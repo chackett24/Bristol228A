@@ -6,6 +6,7 @@ import random as r
 import pyvisa
 import argparse
 #from bristol_fos import FOS
+#from bristol_wavemeter import Wavemeter
 
 
 class Grapher():
