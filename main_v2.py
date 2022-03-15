@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import scipy as sp
 from matplotlib.animation import FuncAnimation
@@ -7,127 +8,95 @@ import pyvisa
 import argparse
 import os
 import time
-#from bristol_fos import FOS
+# from bristol_fos import FOS
+from matplotlib.ticker import FormatStrFormatter, StrMethodFormatter
+
 from bristol_wavemeter import Wavemeter
 
 
-class Grapher():
-    def __init__(self, switches):
-        try:
-            print("oops")
-            #self.wm = Wavemeter()
-        except IndexError:
-            print("bad")
-        # start collections with zeros
-        self.freq = [500]
-        self.power = [500]
-        self.ques = True
-        self.time = 60
-        self.countdown = self.time
-        self.switches = switches
-        self.working_plot = 0
-        # define and adjust figure
-        self.plots = []
-        number_of_subplots = len(self.switches)
-        self.fig = plt.figure(facecolor='#DEDEDE')
-        self.stats = plt.figure()
-        self.statblock = self.stats.add_subplot()
-        self.statblock.axis('off')
-        #plot1 = self.fig.add_subplot(221)
-        for i in range(0,number_of_subplots):
-            self.plots.append(self.fig.add_subplot(number_of_subplots,1,i+1))
-            self.plots[i].set_title("Switch "  + (str(self.switches[i])))
+def grapher(switches, pollTime):
+    try:
+        print("oops")
+        # self.wm = Wavemeter()
+    except IndexError:
+        print("bad")
+    ques = True
+    # define and adjust figure
 
-        for plot in self.plots:
-            plot.set_facecolor('#DEDEDE')
+    # Temporary
+    pollTime = pollTime * 10
 
-        self.fig.subplots_adjust(left=0.1,
-                            bottom=0.1,
-                            right=0.9,
-                            top=0.9,
-                            wspace=0.4,
-                            hspace=.5)
+    plots = []
+    number_of_subplots = len(switches)
+    fig = plt.figure(facecolor='#DEDEDE')
+    stats = plt.figure()
+    statblock = stats.add_subplot()
+    statblock.axis('off')
+    plt.rc('ytick', labelsize=7)
+    for i in range(0, number_of_subplots):
+        plots.append(fig.add_subplot(number_of_subplots, 1, i + 1))
+        plots[i].set_title("Switch " + (str(switches[i])))
 
-        for i in range(0,len(self.plots)):
-            workingPlot = self.plots[i]
-            self.freq = [500]
-            for j in range(0,self.time):
-                self.freq.append(self.freq[-1] + r.randint(-1, 1))
-                #workingPlot.set_title(" Plot")
-                #time.sleep(.1)
-                if 510> self.freq[-1] > 490:
-                    workingPlot.cla()
-                    workingPlot.scatter(len(self.freq) - 1, self.freq[-1])
-            workingPlot.errorbar(list(range(0, len(self.freq))), self.freq, yerr=1)
-            workingPlot.set_ylim(min(self.freq) - 2, max(self.freq) + 2)
-            self.statblock.text(.1, .9 - (i)/len(self.switches),"avg: " + str(round(np.average(self.freq), 4)))
-            self.statblock.text(.6, .9 - (i) / len(self.switches), "std: " + str(round(np.std(self.freq), 4)))
-        if self.ques:
-            self.statblock.text(0, 0, "ALERT: QUES bit is set")
-        plt.show()
+    fig.subplots_adjust(left=0.1,
+                        bottom=0.1,
+                        right=0.9,
+                        top=0.9,
+                        wspace=0.4,
+                        hspace=.5)
 
-        #self.ani = FuncAnimation(self.fig, self.my_function, interval=100)
-        #self.ani.running = True
+    for i in range(0, len(plots)):
+        workingPlot = plots[i]
+        freq = []
+        for j in range(0, pollTime + 1):
+            freq.append(729.4734605 + r.randint(1, 6) * .0000001)
+            # time.sleep(.1)
+            if r.randint(1, 3) == 2:
+                scatterIdx = j
 
-        # function to update the data
+        workingPlot.set_facecolor('#DEDEDE')
+        workingPlot.set_ylim(min(freq) - .0000004, max(freq) + .0000004)
+        workingPlot.yaxis.set_major_formatter(matplotlib.ticker.EngFormatter(unit='THz', places=7))
+        workingPlot.set_ylabel("Frequency")
+        workingPlot.errorbar(list(range(0, len(freq))), freq, yerr=.0000002)
+        workingPlot.scatter(scatterIdx, freq[scatterIdx], c="red", zorder=100)
 
+        statblock.text(.1, .9 - i / len(switches),
+                       "avg: " + str(round(np.average(freq), 7)) + " THz")
+        statblock.text(.6, .9 - i / len(switches), "std: " + str(round(100000000 * np.std(freq), 7)) + " kHz")
+    if ques:
+        statblock.text(0, 0, "ALERT: QUES bit is set")
+    plt.show()
 
-    """def my_function(self, i):
-        self.countdown -= 1
-        if self.countdown == 0:
-            self.countdown = self.time
-            self.working_plot += 1
-            self.freq = [r.randint(-30, 30)]
-
-        if self.working_plot >= len(self.plots):
-            self.ani.event_source.stop()
-        else:
-            # get data
-            self.freq.append(self.freq[-1] + r.randint(-30, 30))
-            self.power.append(self.power[-1] + r.randint(-30, 30))
-            # clear axis
-            self.plots[self.working_plot].cla()
-            # plot cpu
-            self.plots[self.working_plot].set_title((str(self.switches[self.working_plot]) + " Plot"))
-            self.plots[self.working_plot].plot(self.freq)
-            self.plots[self.working_plot].errorbar(list(range(0, len(self.freq))), self.freq, yerr=30)
-            self.plots[self.working_plot].set_ylim(min(self.freq) - 5, max(self.freq) + 10)
-            #self.plot1.plot(self.freq)
-            #self.plot3.text(.5, 2 / 3, '%.1f' % np.average(self.freq), horizontalalignment='center',verticalalignment='center')
-            #self.plot3.text(.5, 1 / 3, '%.1f' % np.std(self.freq), horizontalalignment='center',verticalalignment='center')
-            # ax.scatter(len(freq) - 1, freq[-1])
-            # ax.text(len(freq) - 1, freq[-1] + 2, "{}%".format(freq[-1]))
-            #self.plot1.set_ylim(min(self.freq) - 5, max(self.freq) + 10)
-
-            # plot power"""
-
+    # Reminder that animation is possible
+    # self.ani = FuncAnimation(self.fig, self.my_function, interval=100)
 
 
 def main():
     parser = argparse.ArgumentParser(description='Interface with the 228A.')
     parser.add_argument("-f", "--function", help="eventually specify what task you want",
                         choices=["draw", "switch", "reset"])
-    parser.add_argument("--tick", help="set tick rate in ms, default is 10")
+    parser.add_argument("--time", help="set poll time per switch in seconds, default is 60")
     parser.add_argument("-s", "--switch", help="set gate to switch to", nargs="+", type=int)
     args = parser.parse_args()
     if args.function == "draw" or not args.function:
-        if not args.tick:
-            tick = 10
+        if not args.time:
+            pollTime = 60
         else:
-            tick = args.tick
+            pollTime = int(args.time)
         if not args.switch:
-            switches = [1,2,3]
+            print("here")
+            switches = [1, 2, 3]
         else:
             switches = args.switch
-        grapher = Grapher(switches)
+        grapher(switches, pollTime)
 
     elif args.function == "switch":
         if not args.switch:
             switch = 1
         else:
             switch = args.switch
-        #fos = FOS()
-        #fos.change_channel(switch)
+        # fos = FOS()
+        # fos.change_channel(switch)
         print("switching to " + str(switch))
     elif args.function == "reset":
         print("resetting the thing")
