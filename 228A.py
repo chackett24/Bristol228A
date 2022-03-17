@@ -16,10 +16,10 @@ from bristol_wavemeter import Wavemeter
 
 def grapher(switches, pollTime):
     try:
-        print("oops")
+        print("connect to wavemeter")
         # self.wm = Wavemeter()
     except IndexError:
-        print("bad")
+        print("Index Error")
     ques = True
     # define and adjust figure
 
@@ -28,8 +28,8 @@ def grapher(switches, pollTime):
 
     plots = []
     number_of_subplots = len(switches)
-    fig = plt.figure(facecolor='#DEDEDE')
-    stats = plt.figure()
+    fig = plt.figure(figsize=(11,7), facecolor='#DEDEDE')
+    stats = plt.figure(figsize=(4.5,6))
     statblock = stats.add_subplot()
     statblock.axis('off')
     plt.rc('ytick', labelsize=7)
@@ -37,11 +37,11 @@ def grapher(switches, pollTime):
         plots.append(fig.add_subplot(number_of_subplots, 1, i + 1))
         plots[i].set_title("Switch " + (str(switches[i])))
 
-    fig.subplots_adjust(left=0.1,
+    fig.subplots_adjust(left=0.15,
                         bottom=0.1,
-                        right=0.9,
+                        right=0.95,
                         top=0.9,
-                        wspace=0.4,
+                        wspace=0.5,
                         hspace=.5)
 
     for i in range(0, len(plots)):
@@ -54,15 +54,19 @@ def grapher(switches, pollTime):
                 scatterIdx = j
 
         workingPlot.set_facecolor('#DEDEDE')
+        workingPlot.set_xlabel("Time")
+        workingPlot.set_ylabel("Frequency")
+        workingPlot.xaxis.set_ticks(np.arange(0, pollTime + 1, 100))
+        workingPlot.xaxis.set_ticklabels(np.arange(0, (pollTime/10) + 1, 10))
         workingPlot.set_ylim(min(freq) - .0000004, max(freq) + .0000004)
         workingPlot.yaxis.set_major_formatter(matplotlib.ticker.EngFormatter(unit='THz', places=7))
-        workingPlot.set_ylabel("Frequency")
+        #workingPlot.xaxis.set_major_formatter(matplotlib.ticker.EngFormatter(unit='s'))
         workingPlot.errorbar(list(range(0, len(freq))), freq, yerr=.0000002)
         workingPlot.scatter(scatterIdx, freq[scatterIdx], c="red", zorder=100)
 
-        statblock.text(.1, .9 - i / len(switches),
+        statblock.text(0, .9 - i / len(switches),
                        "avg: " + str(round(np.average(freq), 7)) + " THz")
-        statblock.text(.6, .9 - i / len(switches), "std: " + str(round(100000000 * np.std(freq), 7)) + " kHz")
+        statblock.text(.5, .9 - i / len(switches), "std: " + str(round(100000000 * np.std(freq), 7)) + " kHz")
     if ques:
         statblock.text(0, 0, "ALERT: QUES bit is set")
     plt.show()
@@ -84,7 +88,6 @@ def main():
         else:
             pollTime = int(args.time)
         if not args.switch:
-            print("here")
             switches = [1, 2, 3]
         else:
             switches = args.switch
