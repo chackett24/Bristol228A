@@ -8,7 +8,7 @@ import pyvisa
 import argparse
 import os
 import time
-# from bristol_fos import FOS
+from fos import SerialFos
 from matplotlib.ticker import FormatStrFormatter, StrMethodFormatter
 
 from bristol_wavemeter import Wavemeter
@@ -98,8 +98,8 @@ def main():
             switch = 1
         else:
             switch = args.switch
-        # fos = FOS()
-        # fos.change_channel(switch)
+        fos = SerialFos()
+        fos.change_channel(switch)
         print("switching to " + str(switch))
     elif args.function == "reset":
         print("resetting the thing")

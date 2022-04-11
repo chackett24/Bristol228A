@@ -13,6 +13,8 @@ class Wavemeter:
         print((instr))
         self.device = rm.open_resource(instr[0])  # find the instrument
         self.device.baud_rate = 921600 # 9600
+        self.device.write_termination = "\n"
+        self.device.read_termination = "\n"
 
         print(self.device)
         print(self.device.query('*IDN?'))  # query instrument id
