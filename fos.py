@@ -6,7 +6,7 @@ class SerialFos:
     def __init__(self):
         self.ser = serial.Serial()
         self.ser.baudrate = 57600
-        self.ser.port = 'COM3'
+        self.ser.port = '/dev/ttyUSB0'
         self.ser.timeout = None
         print(self.ser)
         self.ser.open()
@@ -17,7 +17,7 @@ class SerialFos:
             command = "ch" + str(channel) + "\r\n"
             self.ser.write(command.encode())
             self.ser.write(b'ch?\r\n')
-            ret = self.ser.read(size=1)
+            ret = self.ser.read(size=3)
             print(ret.decode())
         else:
             print("Invalid channel")

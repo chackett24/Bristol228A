@@ -18,6 +18,7 @@ def grapher(switches, pollTime):
     try:
         print("connect to wavemeter")
         wm = Wavemeter()
+        fos = SerialFos()
     except IndexError:
         print("Index Error")
     ques = True
@@ -44,6 +45,7 @@ def grapher(switches, pollTime):
                         hspace=.5)
 
     for i in range(0, len(plots)):
+        fos.change_channel(switches[i])
         workingPlot = plots[i]
         freq = []
         endTime = pollTime + time.time()
@@ -99,8 +101,9 @@ def main():
         else:
             switch = args.switch
         fos = SerialFos()
-        fos.change_channel(switch)
-        print("switching to " + str(switch))
+        for i in switch :
+            print("switching to " + str(i))
+            fos.change_channel(i)
     elif args.function == "reset":
         print("resetting the thing")
 
