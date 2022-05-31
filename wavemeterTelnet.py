@@ -4,10 +4,6 @@ class Wavemeter:
     def __init__(self):
         self.tn = Telnet("192.168.1.88")
 
-
-        print(self.device)
-        print(self.device.write('*IDN?'))  # query instrument id
-
     def query(self, command):
         self.tn.write(command)
         return self.tn.read_eager()
@@ -31,3 +27,4 @@ class Wavemeter:
 
 if __name__ == "__main__":
     wm = Wavemeter()
+    print(wm.query(b"*IDN?\n"))
