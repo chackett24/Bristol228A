@@ -11,13 +11,13 @@ import time
 from fos import SerialFos
 from matplotlib.ticker import FormatStrFormatter, StrMethodFormatter
 
-from bristol_wavemeter import Wavemeter
+from wavemeterTelnet import Wavemeter
 
 
 def grapher(switches, pollTime):
     try:
         print("connect to wavemeter")
-        # self.wm = Wavemeter()
+        wm = Wavemeter()
     except IndexError:
         print("Index Error")
     ques = True
@@ -48,7 +48,8 @@ def grapher(switches, pollTime):
         workingPlot = plots[i]
         freq = []
         for j in range(0, pollTime + 1):
-            freq.append(729.4734605 + r.randint(1, 6) * .0000001)
+            freq.append(wm.query(b':MEAS:FREQ?'))
+            #freq.append(729.4734605 + r.randint(1, 6) * .0000001)
             # time.sleep(.1)
             if r.randint(1, 3) == 2:
                 scatterIdx = j

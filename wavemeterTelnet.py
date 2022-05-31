@@ -1,4 +1,5 @@
 from telnetlib import Telnet
+import time
 
 class Wavemeter:
     def __init__(self):
@@ -6,7 +7,8 @@ class Wavemeter:
 
     def query(self, command):
         self.tn.write(command)
-        return self.tn.read_eager()
+        time.sleep(.01)
+        print(self.tn.read_eager())
 
 
     def get_power(self):
