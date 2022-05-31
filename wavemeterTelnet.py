@@ -3,20 +3,21 @@ import time
 
 class Wavemeter:
     def __init__(self):
-        self.tn = Telnet("192.168.1.88")
+        self.tn = Telnet("192.168.1.88", timeout = 10)
 
     def query(self, command):
         self.tn.write(command)
-        time.sleep(.01)
-        return self.tn.read_eager()
+        time.sleep(1)
+        return self.tn.read_very_eager().decode().rstrip("\r\n")
 
 
     def get_power(self):
-        return self.query(':READ:POWer?')
-
+        self.tn.write(b':MEAS:POWer?\n')
+        return self.tn.read_until(b"\r\n").decode().strip("\r\n")
 
     def get_freq(self):
-        return self.query(':MEAS:FREQ?')
+        self.tn.write(b':MEAS:FREQ?\n')
+        return self.tn.read_until(b"\r\n").decode().strip("\r\n")
 
 
     def diagnostics(self):

@@ -24,7 +24,6 @@ def grapher(switches, pollTime):
     # define and adjust figure
 
     # Temporary
-    pollTime = pollTime * 10
 
     plots = []
     number_of_subplots = len(switches)
@@ -47,23 +46,23 @@ def grapher(switches, pollTime):
     for i in range(0, len(plots)):
         workingPlot = plots[i]
         freq = []
-        for j in range(0, pollTime + 1):
-            freq.append(wm.query(b':MEAS:FREQ?'))
+        endTime = pollTime + time.time()
+        while time.time() < endTime:
+            result = float(wm.get_freq())
+            freq.append(result)
             #freq.append(729.4734605 + r.randint(1, 6) * .0000001)
-            time.sleep(.1)
-            if r.randint(1, 3) == 2:
-                scatterIdx = j
-        print(freq)
+            print(freq)
         workingPlot.set_facecolor('#DEDEDE')
         workingPlot.set_xlabel("Time")
         workingPlot.set_ylabel("Frequency")
-        workingPlot.xaxis.set_ticks(np.arange(0, pollTime + 1, 100))
-        workingPlot.xaxis.set_ticklabels(np.arange(0, (pollTime/10) + 1, 10))
+        print("here before\n")
+        workingPlot.xaxis.set_ticks(np.arange(0, pollTime + 1, 1))
+        workingPlot.xaxis.set_ticklabels(np.arange(0, pollTime + 1, 1))
+        print("here after\n")
         workingPlot.set_ylim(min(freq) - .0000004, max(freq) + .0000004)
         workingPlot.yaxis.set_major_formatter(matplotlib.ticker.EngFormatter(unit='THz', places=7))
         #workingPlot.xaxis.set_major_formatter(matplotlib.ticker.EngFormatter(unit='s'))
         workingPlot.errorbar(list(range(0, len(freq))), freq, yerr=.0000002)
-        workingPlot.scatter(scatterIdx, freq[scatterIdx], c="red", zorder=100)
 
         statblock.text(0, .9 - i / len(switches),
                        "avg: " + str(round(np.average(freq), 7)) + " THz")
