@@ -8,7 +8,7 @@ class Wavemeter:
     def query(self, command):
         self.tn.write(command)
         time.sleep(.01)
-        print(self.tn.read_eager())
+        return self.tn.read_eager()
 
 
     def get_power(self):

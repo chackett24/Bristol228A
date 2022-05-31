@@ -50,10 +50,10 @@ def grapher(switches, pollTime):
         for j in range(0, pollTime + 1):
             freq.append(wm.query(b':MEAS:FREQ?'))
             #freq.append(729.4734605 + r.randint(1, 6) * .0000001)
-            # time.sleep(.1)
+            time.sleep(.1)
             if r.randint(1, 3) == 2:
                 scatterIdx = j
-
+        print(freq)
         workingPlot.set_facecolor('#DEDEDE')
         workingPlot.set_xlabel("Time")
         workingPlot.set_ylabel("Frequency")
@@ -89,7 +89,7 @@ def main():
         else:
             pollTime = int(args.time)
         if not args.switch:
-            switches = [1, 2, 3]
+            switches = [1]
         else:
             switches = args.switch
         grapher(switches, pollTime)
